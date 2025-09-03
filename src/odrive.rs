@@ -23,9 +23,28 @@ impl OdriveController {
         Ok(Self { port })
     }
 
-    fn send_command(&mut self, cmd: &str) -> std::io::Result<()> {
+    fn send_command(&mut self, cmd: &str) -> std::io::Result<String> {
         self.port.write(cmd.as_bytes())?;
-        self.port.flush()
+        self.port.flush()?;
+
+        let mut response = String::new();
+        let mut buffer = [0u8; 1024];
+
+        loop {
+            match self.port.read(&mut buffer) {
+                Ok(bytes_read) => {
+                    let chunk = String::from_utf8_lossy(&buffer[..bytes_read]);
+                    response.push_str(&chunk);
+
+                    if chunk.contains('\n') {
+                        break;
+                    }
+                }
+                Err(e) => return Err(e),
+            }
+        }
+
+        Ok(response.trim().to_string())
     }
 
     /// Sends the velocity setting command
@@ -35,8 +54,14 @@ impl OdriveController {
         velocity: u16,
         torque_ff: Option<u16>,
     ) -> std::io::Result<()> {
-        self.send_command(&format!("w axis{motor}.controller.config.control_mode 2"))?;
-        self.send_command(&format!("w axis{motor}.controller.config.input_mode 1"))?;
+        println!(
+            "{}",
+            self.send_command(&format!("w axis{motor}.controller.config.control_mode 2"))?
+        );
+        println!(
+            "{}",
+            self.send_command(&format!("w axis{motor}.controller.config.input_mode 1"))?
+        );
 
         let cmd = if let Some(torque_ff) = torque_ff {
             format!("v {motor} {velocity} {torque_ff}\r\n")
@@ -46,6 +71,7 @@ impl OdriveController {
 
         println!("Sending {cmd}");
 
-        self.send_command(&cmd)
+        println!("{}", self.send_command(&cmd)?);
+        Ok(())
     }
 }
