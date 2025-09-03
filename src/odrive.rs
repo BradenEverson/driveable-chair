@@ -38,6 +38,12 @@ impl OdriveController {
         self.port.flush()
     }
 
+    /// Stops the motor
+    pub fn stop(&mut self, motor: Motor) -> std::io::Result<()> {
+        let motor = motor as u8;
+        self.send_command(&format!("w axis{motor}.requested_state 1\n"))
+    }
+
     /// Sends the velocity setting command
     pub fn velocity(
         &mut self,
