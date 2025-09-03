@@ -23,6 +23,11 @@ impl OdriveController {
         Ok(Self { port })
     }
 
+    fn send_command(&mut self, cmd: &str) -> std::io::Result<()> {
+        self.port.write(cmd.as_bytes())?;
+        self.port.flush()
+    }
+
     /// Sends the velocity setting command
     pub fn velocity(
         &mut self,
@@ -30,6 +35,9 @@ impl OdriveController {
         velocity: u16,
         torque_ff: Option<u16>,
     ) -> std::io::Result<()> {
+        self.send_command(&format!("w axis{motor}.controller.config.control_mode 2"))?;
+        self.send_command(&format!("w axis{motor}.controller.config.input_mode 1"))?;
+
         let cmd = if let Some(torque_ff) = torque_ff {
             format!("v {motor} {velocity} {torque_ff}\r\n")
         } else {
@@ -38,7 +46,6 @@ impl OdriveController {
 
         println!("Sending {cmd}");
 
-        self.port.write(cmd.as_bytes())?;
-        self.port.flush()
+        self.send_command(&cmd)
     }
 }
