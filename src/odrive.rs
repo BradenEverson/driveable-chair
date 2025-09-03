@@ -17,34 +17,15 @@ impl OdriveController {
             .flow_control(FlowControl::None)
             .parity(Parity::None)
             .stop_bits(StopBits::One)
-            .timeout(Duration::from_millis(10000))
+            .timeout(Duration::from_millis(1000))
             .open()?;
 
         Ok(Self { port })
     }
 
-    fn send_command(&mut self, cmd: &str) -> std::io::Result<String> {
+    fn send_command(&mut self, cmd: &str) -> std::io::Result<()> {
         self.port.write(cmd.as_bytes())?;
-        self.port.flush()?;
-
-        let mut response = String::new();
-        let mut buffer = [0u8; 1024];
-
-        loop {
-            match self.port.read(&mut buffer) {
-                Ok(bytes_read) => {
-                    let chunk = String::from_utf8_lossy(&buffer[..bytes_read]);
-                    response.push_str(&chunk);
-
-                    if chunk.contains('\n') {
-                        break;
-                    }
-                }
-                Err(e) => return Err(e),
-            }
-        }
-
-        Ok(response.trim().to_string())
+        self.port.flush()
     }
 
     /// Sends the velocity setting command
@@ -54,24 +35,17 @@ impl OdriveController {
         velocity: u16,
         torque_ff: Option<u16>,
     ) -> std::io::Result<()> {
-        println!(
-            "{}",
-            self.send_command(&format!("w axis{motor}.controller.config.control_mode 2"))?
-        );
-        println!(
-            "{}",
-            self.send_command(&format!("w axis{motor}.controller.config.input_mode 1"))?
-        );
+        self.send_command(&format!("w axis{motor}.controller.config.control_mode 2\n"))?;
+        self.send_command(&format!("w axis{motor}.controller.config.input_mode 1\n"))?;
 
         let cmd = if let Some(torque_ff) = torque_ff {
-            format!("v {motor} {velocity} {torque_ff}\r\n")
+            format!("v {motor} {velocity} {torque_ff}\n")
         } else {
-            format!("v {motor} {velocity}\r\n")
+            format!("v {motor} {velocity}\n")
         };
 
         println!("Sending {cmd}");
 
-        println!("{}", self.send_command(&cmd)?);
-        Ok(())
+        self.send_command(&cmd)
     }
 }
