@@ -17,7 +17,7 @@ impl OdriveController {
             .flow_control(FlowControl::None)
             .parity(Parity::None)
             .stop_bits(StopBits::One)
-            .timeout(Duration::from_millis(1000))
+            .timeout(Duration::from_millis(10000))
             .open()?;
 
         Ok(Self { port })
