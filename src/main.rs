@@ -17,7 +17,7 @@ fn main() {
         .expect("Failed to set velocity");
 
     left_odrive
-        .velocity(Motor::Zero, 5, None)
+        .velocity(Motor::Zero, -5, None)
         .expect("Failed to set velocity");
 
     thread::sleep(Duration::from_secs(3));
