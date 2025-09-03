@@ -31,12 +31,10 @@ impl OdriveController {
         torque_ff: Option<u16>,
     ) -> std::io::Result<()> {
         let cmd = if let Some(torque_ff) = torque_ff {
-            format!("v {motor} {velocity} {torque_ff}")
+            format!("v {motor} {velocity} {torque_ff}\n")
         } else {
-            format!("v {motor} {velocity}")
+            format!("v {motor} {velocity}\n")
         };
-
-        println!("{}", cmd.is_ascii());
 
         self.port.write(cmd.as_bytes())?;
         self.port.flush()
