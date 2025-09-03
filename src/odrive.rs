@@ -36,6 +36,8 @@ impl OdriveController {
             format!("v {motor} {velocity}\r\n")
         };
 
+        println!("Sending {cmd}");
+
         self.port.write(cmd.as_bytes())?;
         self.port.flush()
     }
