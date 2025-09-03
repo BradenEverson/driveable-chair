@@ -36,6 +36,8 @@ impl OdriveController {
             format!("v {motor} {velocity}")
         };
 
+        println!("{}", cmd.is_ascii());
+
         self.port.write(cmd.as_bytes())?;
         self.port.flush()
     }
