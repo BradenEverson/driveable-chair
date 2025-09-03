@@ -14,9 +14,9 @@ fn main() {
         .velocity(Motor::Zero, 10, None)
         .expect("Failed to set velocity");
 
-    thread::sleep(Duration::from_secs(5));
+    thread::sleep(Duration::from_secs(3));
 
     right_odrive
-        .velocity(Motor::Zero, 0, None)
-        .expect("Failed to set velocity");
+        .stop(Motor::Zero)
+        .expect("Stop, that's no good");
 }
