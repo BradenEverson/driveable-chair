@@ -9,6 +9,15 @@ pub struct OdriveController {
     port: Box<dyn SerialPort>,
 }
 
+/// Selectable motor types
+#[repr(u8)]
+pub enum Motor {
+    /// Motor 0
+    Zero,
+    /// Motor 1
+    One,
+}
+
 impl OdriveController {
     /// Create a new ODrive controller from Serial
     pub fn from_port(port: &str) -> serialport::Result<Self> {
@@ -23,6 +32,7 @@ impl OdriveController {
         Ok(Self { port })
     }
 
+    /// Sends and flushes a command to the odrive
     fn send_command(&mut self, cmd: &str) -> std::io::Result<()> {
         self.port.write(cmd.as_bytes())?;
         self.port.flush()
@@ -31,10 +41,11 @@ impl OdriveController {
     /// Sends the velocity setting command
     pub fn velocity(
         &mut self,
-        motor: u8,
+        motor: Motor,
         velocity: u16,
         torque_ff: Option<u16>,
     ) -> std::io::Result<()> {
+        let motor = motor as u8;
         self.send_command(&format!("w axis{motor}.requested_state 8\n"))?;
         self.send_command(&format!("w axis{motor}.controller.config.control_mode 2\n"))?;
         self.send_command(&format!("w axis{motor}.controller.config.input_mode 1\n"))?;
