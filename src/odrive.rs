@@ -35,8 +35,7 @@ impl OdriveController {
         velocity: u16,
         torque_ff: Option<u16>,
     ) -> std::io::Result<()> {
-        self.send_command(&format!("w axis{motor}.controller.config.control_mode 2\n"))?;
-        self.send_command(&format!("w axis{motor}.controller.config.input_mode 1\n"))?;
+        self.send_command(&format!("w axis{motor}.requested_state 8\n"))?;
 
         let cmd = if let Some(torque_ff) = torque_ff {
             format!("v {motor} {velocity} {torque_ff}\n")
