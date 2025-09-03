@@ -48,8 +48,8 @@ impl OdriveController {
     pub fn velocity(
         &mut self,
         motor: Motor,
-        velocity: u16,
-        torque_ff: Option<u16>,
+        velocity: i16,
+        torque_ff: Option<i16>,
     ) -> std::io::Result<()> {
         let motor = motor as u8;
         self.send_command(&format!("w axis{motor}.requested_state 8\n"))?;
